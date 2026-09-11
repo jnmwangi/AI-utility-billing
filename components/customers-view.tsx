@@ -193,7 +193,7 @@ function FragmentRow({
         </td>
         <td className="px-3 py-3">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger>
               <Button variant="ghost" size="icon" className="size-8">
                 <MoreHorizontal className="size-4" />
                 <span className="sr-only">Actions</span>

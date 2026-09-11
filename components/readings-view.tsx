@@ -93,7 +93,7 @@ export function ReadingsView() {
         <form onSubmit={submit} className="mt-4 space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="meter">Meter</Label>
-            <Select value={meterId} onValueChange={setMeterId}>
+            <Select value={meterId} onValueChange={(value) => setMeterId(value ?? "")}>
               <SelectTrigger id="meter">
                 <SelectValue placeholder="Select a meter" />
               </SelectTrigger>

@@ -90,7 +90,7 @@ export function InvoiceGenerateDialog({
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="customer">Customer</Label>
-              <Select value={customerId} onValueChange={setCustomerId}>
+              <Select value={customerId} onValueChange={(value) => setCustomerId(value ?? "")}>
                 <SelectTrigger id="customer">
                   <SelectValue placeholder="Select a customer" />
                 </SelectTrigger>
