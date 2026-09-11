@@ -39,7 +39,7 @@ interface StoreValue {
   deleteCustomer: (id: string) => void
   addMeter: (m: NewMeter) => Meter
   deleteMeter: (id: string) => void
-  addReading: (meterId: string, value: number, readAt: string) => { ok: boolean; error?: string }
+  addReading: (meterId: string, value: number, readAt: string, photoPath?: string) => { ok: boolean; error?: string }
   generateInvoice: (input: GenerateInvoiceInput) => { ok: boolean; error?: string; invoice?: Invoice }
   recordPayment: (invoiceId: string, amount: number, method: Payment["method"], date: string) => { ok: boolean; error?: string }
   applyLateFee: (invoiceId: string) => { ok: boolean; error?: string; fee?: number }
@@ -91,7 +91,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setReadings((prev) => prev.filter((r) => r.meterId !== id))
   }, [])
 
-  const addReading = useCallback((meterId: string, value: number, readAt: string) => {
+  const addReading = useCallback((meterId: string, value: number, readAt: string, photoPath?: string) => {
     const meter = meters.find((m) => m.id === meterId)
     if (!meter) return { ok: false, error: "Meter not found." }
     if (value < meter.lastReading) {
@@ -104,6 +104,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       value,
       readAt,
       consumption,
+      photoPath,
     }
     setReadings((prev) => [reading, ...prev])
     setMeters((prev) => prev.map((m) => (m.id === meterId ? { ...m, lastReading: value } : m)))

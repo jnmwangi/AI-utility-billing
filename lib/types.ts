@@ -33,6 +33,8 @@ export interface Reading {
   readAt: string
   /** Metered consumption for this reading: (value - previous) * multiplier */
   consumption: number
+  /** Private Blob pathname for the meter photo captured by the reader. */
+  photoPath?: string
 }
 
 export interface InvoiceLine {

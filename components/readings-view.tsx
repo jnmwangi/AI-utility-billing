@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { UtilityBadge } from "@/components/entity-badges"
-import { Download, Gauge } from "lucide-react"
+import { Camera, Download, Gauge } from "lucide-react"
 
 function todayLocalDate(): string {
   const d = new Date()
@@ -25,6 +25,8 @@ export function ReadingsView() {
   const [meterId, setMeterId] = useState<string>(meters[0]?.id ?? "")
   const [value, setValue] = useState("")
   const [date, setDate] = useState(todayLocalDate())
+  const [photo, setPhoto] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
 
   const customerName = useMemo(() => new Map(customers.map((c) => [c.id, c.name])), [customers])
   const meterMap = useMemo(() => new Map(meters.map((m) => [m.id, m])), [meters])
@@ -43,7 +45,7 @@ export function ReadingsView() {
     [readings],
   )
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault()
     if (!selected) {
       toast.error("Select a meter.")
@@ -55,13 +57,24 @@ export function ReadingsView() {
       return
     }
     const readAt = new Date(`${date}T12:00:00`).toISOString()
-    const result = addReading(selected.id, v, readAt)
+    let photoPath: string | undefined
+    if (photo) {
+      setUploading(true)
+      const form = new FormData()
+      form.append("file", photo)
+      const upload = await fetch("/api/meter-photos", { method: "POST", body: form })
+      setUploading(false)
+      if (!upload.ok) { toast.error("Could not upload the meter photo."); return }
+      photoPath = (await upload.json()).pathname
+    }
+    const result = addReading(selected.id, v, readAt, photoPath)
     if (!result.ok) {
       toast.error(result.error ?? "Could not record reading.")
       return
     }
-    toast.success(`Recorded reading for ${selected.serialNo}.`)
+    toast.success(`Recorded reading for ${selected.serialNo}${photo ? " with photo" : ""}.`)
     setValue("")
+    setPhoto(null)
   }
 
   function exportCsv() {
@@ -124,6 +137,15 @@ export function ReadingsView() {
           <div className="grid gap-2">
             <Label htmlFor="date">Read date</Label>
             <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="meter-photo">Meter photo</Label>
+            <div className="flex items-center gap-3">
+              <Input id="meter-photo" type="file" accept="image/*" capture="environment" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
+              <Camera className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            </div>
+            <p className="text-xs text-muted-foreground">Required for remote-area readings. One photo per reading, up to 8 MB.</p>
           </div>
 
           {preview ? (
